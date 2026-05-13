@@ -11,7 +11,6 @@ function OrderProgress({ status }: { status: OrderStatus }) {
       </div>
     );
   }
-  
 
   const currentIdx = PROGRESS_STEPS.indexOf(status);
 
