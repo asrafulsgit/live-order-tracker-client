@@ -38,6 +38,27 @@ export type Order = {
   updated_at: string;
 };
 
+export type AdminOrder = {
+  id: string;
+  user_id: string;
+  food_id: string;
+  quantity: number;
+  total: number;
+  status: OrderStatus;
+  address: string;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+  food: {
+    name: string;
+    image_url: string;
+    description: string;
+    category: string;
+    price: number;
+  } | null;
+  customer: { full_name: string | null; email: string } | null;
+};
+
 export type NewOrder = Order & {
   food: Food;
 };
@@ -242,7 +263,7 @@ export const ORDERS: Order[] = [
   // Out for delivery
   {
     id: "o-005",
-    user_id: "u-104",
+    user_id: "u-105",
     food_id: "f-012",
     quantity: 2,
     total: 24.0,
@@ -268,7 +289,7 @@ export const ORDERS: Order[] = [
   },
   {
     id: "o-007",
-    user_id: "u-105",
+    user_id: "u-101",
     food_id: "f-004",
     quantity: 1,
     total: 11.5,
@@ -294,7 +315,7 @@ export const ORDERS: Order[] = [
   // Cancelled
   {
     id: "o-009",
-    user_id: "u-101",
+    user_id: "u-102",
     food_id: "f-002",
     quantity: 1,
     total: 14.0,
@@ -318,24 +339,169 @@ export const ORDERS: Order[] = [
   },
 ];
 
+export const CUSTOMERS: { id: string; name: string; email: string }[] = [
+  {
+    id: "u-101",
+    name: "Karim Ahmed",
+    email: "karim@gmail.com",
+  },
+  {
+    id: "u-102",
+    name: "Ayesha Rahman",
+    email: "ayesha@gmail.com",
+  },
+  {
+    id: "u-103",
+    name: "Tanvir Hasan",
+    email: "tanvir@gmail.com",
+  },
+  {
+    id: "u-104",
+    name: "Nusrat Jahan",
+    email: "nusrat@gmail.com",
+  },
+  {
+    id: "u-105",
+    name: "Rakib Hossain",
+    email: "rakib@gmail.com",
+  },
+];
+
+export const ADMIN_ORDERS: AdminOrder[] = [
+  {
+    id: "o-001",
+    user_id: "u-101",
+    food_id: "f-001",
+    quantity: 2,
+    total: 25.0,
+    status: "ordered",
+    address: "221B Baker Street, London",
+    notes: "Extra basil please.",
+    created_at: "2026-05-13T09:15:00.000Z",
+    updated_at: "2026-05-13T09:15:00.000Z",
+    food: {
+      name: "Margherita Pizza",
+      image_url:
+        "https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?w=800",
+      description: "Classic pizza with tomato, fresh mozzarella, and basil.",
+      category: "Pizza",
+      price: 12.5,
+    },
+    customer: {
+      full_name: "Karim Ahmed",
+      email: "karim@gmail.com",
+    },
+  },
+
+  {
+    id: "o-003",
+    user_id: "u-103",
+    food_id: "f-003",
+    quantity: 3,
+    total: 29.25,
+    status: "in_progress",
+    address: "1600 Amphitheatre Pkwy, Mountain View",
+    notes: "No pickles.",
+    created_at: "2026-05-13T08:50:00.000Z",
+    updated_at: "2026-05-13T09:05:00.000Z",
+    food: {
+      name: "Cheeseburger",
+      image_url:
+        "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800",
+      description:
+        "Juicy beef patty, cheddar, lettuce, tomato, and house sauce.",
+      category: "Burger",
+      price: 9.75,
+    },
+    customer: {
+      full_name: "Tanvir Hasan",
+      email: "tanvir@gmail.com",
+    },
+  },
+
+  {
+    id: "o-005",
+    user_id: "u-105",
+    food_id: "f-012",
+    quantity: 2,
+    total: 24.0,
+    status: "delivery",
+    address: "10 Downing Street, London",
+    notes: "Leave at door.",
+    created_at: "2026-05-13T08:00:00.000Z",
+    updated_at: "2026-05-13T09:10:00.000Z",
+    food: {
+      name: "Pad Thai",
+      image_url:
+        "https://images.unsplash.com/photo-1559314809-0d155014e29e?w=800",
+      description: "Stir-fried rice noodles with peanuts, lime, and shrimp.",
+      category: "Asian",
+      price: 12.0,
+    },
+    customer: {
+      full_name: "Rakib Hossain",
+      email: "rakib@gmail.com",
+    },
+  },
+
+  {
+    id: "o-006",
+    user_id: "u-102",
+    food_id: "f-011",
+    quantity: 2,
+    total: 13.0,
+    status: "completed",
+    address: "742 Evergreen Terrace, Springfield",
+    notes: "Birthday surprise!",
+    created_at: "2026-05-12T18:20:00.000Z",
+    updated_at: "2026-05-12T19:05:00.000Z",
+    food: {
+      name: "Chocolate Lava Cake",
+      image_url:
+        "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=800",
+      description:
+        "Warm chocolate cake with a molten center and vanilla ice cream.",
+      category: "Dessert",
+      price: 6.5,
+    },
+    customer: {
+      full_name: "Ayesha Rahman",
+      email: "ayesha@gmail.com",
+    },
+  },
+
+  {
+    id: "o-009",
+    user_id: "u-102",
+    food_id: "f-002",
+    quantity: 1,
+    total: 14.0,
+    status: "cancelled",
+    address: "221B Baker Street, London",
+    notes: "Ordered by mistake.",
+    created_at: "2026-05-12T11:00:00.000Z",
+    updated_at: "2026-05-12T11:04:00.000Z",
+    food: {
+      name: "Pepperoni Pizza",
+      image_url:
+        "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800",
+      description: "Loaded with spicy pepperoni and melted mozzarella.",
+      category: "Pizza",
+      price: 14.0,
+    },
+    customer: {
+      full_name: "Ayesha Rahman",
+      email: "ayesha@gmail.com",
+    },
+  },
+];
+
 // Helpers
 export const getFoodById = (id: string): Food | undefined =>
   FOODS.find((f) => f.id === id);
 
-export const getOrdersByStatus = (status: OrderStatus): NewOrder[] =>
-  ORDERS.reduce<NewOrder[]>((result, order) => {
-    if (order.status !== status) return result;
-
-    const food = getFoodById(order.food_id);
-    if (!food) return result;
-
-    result.push({
-      ...order,
-      food,
-    });
-
-    return result;
-  }, []);
+export const getAdminOrdersByStatus = (status: OrderStatus): AdminOrder[] =>
+  ADMIN_ORDERS.filter((order) => order.status === status);
 
 export const STATUS_LABEL: Record<OrderStatus, string> = {
   ordered: "Ordered",
@@ -351,3 +517,5 @@ export const PROGRESS_STEPS: OrderStatus[] = [
   "delivery",
   "completed",
 ];
+
+export const ORDER_STATUSES = ["ordered", "in_progress", "delivery", "completed", "cancelled"] as const;
