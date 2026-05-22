@@ -1,13 +1,44 @@
+"use client";
+
 import { Leaf, ShoppingBag, LogOut, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { authServices } from "@/services/auth.services";
+import { toast } from "sonner";
+import { useEffect, useState } from "react";
+
+type IUser = {
+  name: string;
+  email: string;
+  role: string;
+} | null;
 
 export function Navbar() {
-  const user = {
-    email: "user@gamil.com",
-    role: "user",
-  };
-  const role = user.role as "admin" | "user";
+  const [userData, setUserData] = useState<IUser>(null);
+
+  const role = userData?.role as "ADMIN" | "USER";
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const data = await authServices.me();
+        setUserData(data.data);
+      } catch (error: any) {
+        console.log(error);
+      }
+    };
+
+    fetchUser();
+  }, [userData]);
+
+  async function signOut() {
+    try {
+      await authServices.logout();
+    } catch (error: any) {
+      toast.error(error.message || "Error while logout");
+    }
+  }
+
   return (
     <header className="sticky top-0 z-30 border-b border-border/60 bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
@@ -18,9 +49,9 @@ export function Navbar() {
           <span className="text-lg font-semibold tracking-tight">Sprout</span>
         </Link>
 
-        {user ? (
+        {userData ? (
           <nav className="flex items-center gap-1 sm:gap-2">
-            {role === "user" && (
+            {role === "USER" && (
               <Button asChild variant="ghost" size="sm">
                 <Link href="/orders">
                   <ShoppingBag className="h-4 w-4" />
@@ -29,7 +60,7 @@ export function Navbar() {
               </Button>
             )}
 
-            {role === "admin" && (
+            {role === "ADMIN" && (
               <Button asChild variant="ghost" size="sm">
                 <Link href="/admin">
                   <ShieldCheck className="h-4 w-4" />
@@ -39,13 +70,9 @@ export function Navbar() {
             )}
 
             <span className="hidden text-sm text-muted-foreground sm:inline">
-              {user.email}
+              {userData.name}
             </span>
-            <Button
-              variant="outline"
-              size="sm"
-              // onClick={signOut}
-            >
+            <Button variant="outline" size="sm" onClick={signOut}>
               <LogOut className="h-4 w-4" />
               <span className="hidden sm:inline">Sign out</span>
             </Button>

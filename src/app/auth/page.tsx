@@ -7,8 +7,12 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
+import { authServices } from "@/services/auth.services";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -16,8 +20,16 @@ function LoginPage() {
   async function onSignIn(e: React.FormEvent) {
     e.preventDefault();
 
-    // if (error) toast.error(error);
-    // else toast.success("Welcome back!");
+    try {
+      const data = await authServices.login({
+        email,
+        password,
+      });
+      toast.success(data?.message || "Login successfull");
+      router.push("/");
+    } catch (error: any) {
+      toast.error(error.message || "Error while login");
+    }
   }
 
   async function onSignUp(e: React.FormEvent) {

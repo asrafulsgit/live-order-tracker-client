@@ -1,7 +1,5 @@
-import FoodList from "@/components/food/Foods";
-
 const page = () => {
-  return <FoodList />;
+  return <h1>Hello Users</h1>;
 };
 
 export default page;
