@@ -1,8 +1,8 @@
 "use client";
 
-import { Food, getFoodById } from "@/constants/data";
+import { Food } from "@/constants/data";
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Skeleton } from "../ui/skeleton";
 import Image from "next/image";
 import { Badge } from "../ui/badge";
@@ -13,19 +13,53 @@ import { Minus, Plus } from "lucide-react";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { cn } from "@/lib/utils";
+import { foodServices } from "@/services/food.services";
+import { toast } from "sonner";
+import { orderServices } from "@/services/order.services";
 
 const FoodDetails = () => {
   const foodId = useParams().id as string;
-  const isLoading = false;
-  const user = {
-    email: "karim@gmail.com",
-  };
-  const [qty, setQty] = useState(1);
-  const [address, setAddress] = useState("");
-  const [notes, setNotes] = useState("");
-  const [placing, setPlacing] = useState(false);
+  const [qty, setQty] = useState<number>(1);
+  const [address, setAddress] = useState<string>("");
+  const [notes, setNotes] = useState<string>("");
+  const [placing, setPlacing] = useState<boolean>(false);
 
-  const food = getFoodById(foodId) as Food;
+  const [food, setFood] = useState<Food | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const data = await foodServices.getFood(foodId);
+        setFood(data.data);
+        setIsLoading(false);
+      } catch (error: any) {
+        toast.error(error.message);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+  const hanldePlaceOrder = async () => {
+    if (!qty || !address) {
+      toast.error("quantity and address are required");
+      return;
+    }
+    setPlacing(true);
+    try {
+      await orderServices.createOrder({
+        food_id: foodId,
+        quantity: qty,
+        address,
+        notes,
+      });
+      setPlacing(false);
+      toast.success("Order placed successfully");
+    } catch (error: any) {
+      toast.error(error.message);
+      setPlacing(false);
+    }
+  };
 
   if (isLoading || !food) {
     return (
@@ -35,11 +69,12 @@ const FoodDetails = () => {
       </div>
     );
   }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div className="aspect-4/3 relative overflow-hidden  rounded-2xl border border-border/60 bg-muted">
         <Image
-          src={food.image_url}
+          src={food.image_url || "https://i.ibb.co.com/qYbBkbcg/no-image-available-icon-flat-vector-no-image-available-icon-flat-vector-illustration-132482953.webp"}
           alt={food.name}
           fill
           loading="lazy"
@@ -114,7 +149,7 @@ const FoodDetails = () => {
           </div>
 
           <Button
-            // onClick={placeOrder}
+            onClick={hanldePlaceOrder}
             disabled={placing}
             className="w-full"
             size="lg"

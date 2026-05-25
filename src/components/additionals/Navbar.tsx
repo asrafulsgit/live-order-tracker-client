@@ -6,16 +6,17 @@ import Link from "next/link";
 import { authServices } from "@/services/auth.services";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
-type IUser = {
+export type IUser = {
   name: string;
   email: string;
   role: string;
 } | null;
 
 export function Navbar() {
+  const router = useRouter();
   const [userData, setUserData] = useState<IUser>(null);
-
   const role = userData?.role as "ADMIN" | "USER";
 
   useEffect(() => {
@@ -29,11 +30,12 @@ export function Navbar() {
     };
 
     fetchUser();
-  }, [userData]);
+  }, []);
 
   async function signOut() {
     try {
       await authServices.logout();
+      router.replace("/auth")
     } catch (error: any) {
       toast.error(error.message || "Error while logout");
     }
@@ -79,7 +81,7 @@ export function Navbar() {
           </nav>
         ) : (
           <Button asChild size="sm">
-            <Link href="/login">Sign in</Link>
+            <Link href="/auth">Sign in</Link>
           </Button>
         )}
       </div>

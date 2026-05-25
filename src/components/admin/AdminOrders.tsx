@@ -1,45 +1,68 @@
 "use client";
 import {
   AdminOrder,
-  getAdminOrdersByStatus,
   ORDER_STATUSES,
   OrderStatus,
   STATUS_LABEL,
 } from "@/constants/data";
 import { CheckCircle2, Clock, Truck, Utensils, XCircle } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card } from "../ui/card";
 import OrderDetailsDialog from "@/components/admin/OrderDialog";
 import { Badge } from "../ui/badge";
 import { Skeleton } from "../ui/skeleton";
 import AdminOrderCard from "@/components/admin/OrderCard";
+import { Order } from "../user/MyOrders";
+import { orderServices } from "@/services/order.services";
+import { toast } from "sonner";
+import { useSocketIO } from "@/hooks/useSocketIO";
 
 const AdminOrders = () => {
-  const [activeTab, setActiveTab] = useState<OrderStatus>("ordered");
-  const [selected, setSelected] = useState<AdminOrder | null>(null);
+  const { emit, on, isConnected, isLoading: socketLoading } = useSocketIO();
+  const [activeTab, setActiveTab] = useState<OrderStatus>("ORDERED");
+  const [selected, setSelected] = useState<Order | null>(null);
 
-  const isLoading = false;
-  const data: AdminOrder[] = getAdminOrdersByStatus(activeTab);
+  const [data, setData] = useState<Order[] | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const data = await orderServices.getAllOrders();
+        setData(data.data);
+        setIsLoading(false);
+      } catch (error: any) {
+        toast.error(error.message);
+      }
+    };
+
+    fetchUser();
+  }, []);
   const counts: Record<OrderStatus, number> = {
-    ordered: 0,
-    in_progress: 0,
-    delivery: 0,
-    completed: 0,
-    cancelled: 0,
+    ORDERED: 0,
+    IN_PROGRESS: 0,
+    DELIVERY: 0,
+    COMPLETED: 0,
+    CANCELLED: 0,
   };
   data?.forEach((o) => {
     counts[o.status]++;
   });
 
-  const filtered = data?.filter((o) => o.status === activeTab) ?? [];
+  useEffect(() => {
+    on("order:created", (newOrder: Order) => {
+      setData((prev) => [newOrder, ...(prev ?? [])]);
+    });
+  }, []);
 
-  //   if (loading || !role) {
-  //     return (
-  //       <div className="flex min-h-screen items-center justify-center">
-  //         <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-  //       </div>
-  //     );
-  //   }
+  const filtered = data?.filter((o) => o.status === activeTab) ?? [];
+  console.log(data)
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+      </div>
+    );
+  }
   return (
     <>
       {/* Tabs */}
@@ -96,28 +119,28 @@ const AdminOrders = () => {
 export default AdminOrders;
 
 function EmptyState({ status }: { status: OrderStatus }) {
-  const map = {
-    ordered: {
+  const map: Record<OrderStatus, Record<string, any>> = {
+    ORDERED: {
       Icon: Clock,
       title: "No new orders",
       desc: "Fresh orders will appear here as they come in.",
     },
-    in_progress: {
+    IN_PROGRESS: {
       Icon: Utensils,
       title: "Nothing in the kitchen",
       desc: "Orders being prepared will show up here.",
     },
-    delivery: {
+    DELIVERY: {
       Icon: Truck,
       title: "No deliveries in transit",
       desc: "Orders out for delivery will appear here.",
     },
-    completed: {
+    COMPLETED: {
       Icon: CheckCircle2,
       title: "No completed orders yet",
       desc: "Successfully delivered orders will be archived here.",
     },
-    cancelled: {
+    CANCELLED: {
       Icon: XCircle,
       title: "No cancelled orders",
       desc: "Cancelled orders will be listed here for your records.",

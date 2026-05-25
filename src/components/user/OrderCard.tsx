@@ -1,16 +1,17 @@
-import { NewOrder, OrderStatus, STATUS_LABEL } from "@/constants/data";
+import { OrderStatus, STATUS_LABEL } from "@/constants/data";
 import Image from "next/image";
 import { Card } from "../ui/card";
 import OrderProgress from "@/components/user/ProgressBar";
 import { Button } from "../ui/button";
+import { Order } from "./MyOrders";
 
-const OrderCard = ({ order }: { order: NewOrder }) => {
+const OrderCard = ({ order }: { order: Order }) => {
   return (
     <Card className="overflow-hidden p-0 gap-3">
       <div className=" flex flex-col  gap-2 p-5 sm:flex-row">
         <div className="h-24 w-24 relative">
           <Image
-            src={order.food?.image_url}
+            src={order.food?.image_url || "https://i.ibb.co.com/qYbBkbcg/no-image-available-icon-flat-vector-no-image-available-icon-flat-vector-illustration-132482953.webp"}
             alt={order.food?.name}
             fill
             className=" flex-0 rounded-xl object-cover"
@@ -33,9 +34,9 @@ const OrderCard = ({ order }: { order: NewOrder }) => {
       <div className="border-t border-border bg-muted/30 px-5 py-4">
         <OrderProgress status={order.status as OrderStatus} />
       </div>
-      {order.status !== "completed" &&
-        order.status !== "cancelled" &&
-        order.status !== "delivery" && (
+      {order.status !== "COMPLETED" &&
+        order.status !== "CANCELLED" &&
+        order.status !== "DELIVERY" && (
           <div className="flex justify-end border-t border-border bg-card px-5 py-3">
             <Button
               size="sm"
@@ -48,7 +49,7 @@ const OrderCard = ({ order }: { order: NewOrder }) => {
             </Button>
           </div>
         )}
-      {(order.status === "completed" || order.status === "cancelled") && (
+      {(order.status === "COMPLETED" || order.status === "CANCELLED") && (
         <div className="border-t border-border bg-card px-5 py-3 text-xs text-muted-foreground">
           {STATUS_LABEL[order.status as OrderStatus]} on{" "}
           {new Date(order.updated_at).toLocaleString()}

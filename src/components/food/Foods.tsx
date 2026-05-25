@@ -1,11 +1,27 @@
-import { Food, FOODS } from "@/constants/data";
-import { Navbar } from "../additionals/Navbar";
+"use client";
+import { Food } from "@/constants/data";
 import { Skeleton } from "../ui/skeleton";
 import FoodCard from "./FoodCard";
+import { useEffect, useState } from "react";
+import { foodServices } from "@/services/food.services";
+import { toast } from "sonner";
 
 function FoodList() {
-  const data: Food[] = FOODS;
-  const isLoading = false;
+  const [data, setData] = useState<Food[] | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const data = await foodServices.getFoods();
+        setData(data.data);
+        setIsLoading(false);
+      } catch (error: any) {
+        toast.error(error.message);
+      }
+    };
+
+    fetchUser();
+  }, []);
   return (
     <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <section className="mb-10">

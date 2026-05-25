@@ -1,33 +1,59 @@
-import {
-  getFoodById,
-  NewOrder,
-  ORDERS,
-  OrderStatus,
-  STATUS_LABEL,
-} from "@/constants/data";
+"use client";
 import { Card } from "../ui/card";
 import { ShoppingBag } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
-import Image from "next/image";
-import OrderProgress from "@/components/user/ProgressBar";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import OrderCard from "./OrderCard";
+import { useEffect, useState } from "react";
+import { orderServices } from "@/services/order.services";
+import { toast } from "sonner";
+import { OrderStatus } from "@/constants/data";
+
+export type Order = {
+  user: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  food: {
+    id: string;
+    name: string;
+    price: number;
+    category: string;
+    image_url: string | null;
+    description : string
+  };
+  food_id: string;
+  quantity: number;
+  address: string;
+  notes: string | null;
+  id: string;
+  total: number;
+  status: OrderStatus;
+  created_at: Date;
+  updated_at: Date;
+  user_id: string;
+};
 
 const MyOrders = () => {
-  const isLoading = false;
-  const data: NewOrder[] = ORDERS.reduce<NewOrder[]>((result, order) => {
-    const food = getFoodById(order.food_id);
-    if (!food) return result;
+  const [data, setData] = useState<Order[] | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const data = await orderServices.getMyOrders();
+        setData(data.data);
+        setIsLoading(false);
+      } catch (error: any) {
+        toast.error(error.message);
+      }
+    };
 
-    result.push({
-      ...order,
-      food,
-    });
-
-    return result;
+    fetchUser();
   }, []);
-  if (isLoading)
+
+  if (isLoading) {
     return (
       <div className="space-y-4">
         {Array.from({ length: 3 }).map((_, i) => (
@@ -35,8 +61,9 @@ const MyOrders = () => {
         ))}
       </div>
     );
+  }
 
-  return data && data.length > 0 ? (
+  return data && data?.length > 0 ? (
     <div className="space-y-4">
       {data.map((o) => (
         <OrderCard order={o} key={o.id} />

@@ -1,5 +1,13 @@
+import Hero from "@/components/home/Hero";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+
 const page = () => {
-  return <h1>Hello Users</h1>;
+  return (
+    <div className="w-full h-screen flex justify-center items-center">
+      <Hero />
+    </div>
+  );
 };
 
 export default page;

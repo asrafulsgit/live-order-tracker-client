@@ -1,24 +1,43 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AdminOrder, ORDER_STATUSES, STATUS_LABEL } from "@/constants/data";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ORDER_STATUSES, OrderStatus, STATUS_LABEL } from "@/constants/data";
+import { Order } from "../user/MyOrders";
+import { orderServices } from "@/services/order.services";
+import { toast } from "sonner";
 
 function AdminOrderCard({
   order,
   onView,
   //   onStatusChange,
 }: {
-  order: AdminOrder;
+  order: Order;
   onView: () => void;
   //   onStatusChange: (s: OrderStatus) => void;
 }) {
-  const isFinal = order.status === "completed" || order.status === "cancelled";
+  const isFinal = order.status === "COMPLETED" || order.status === "CANCELLED";
+
+  const onStatusChange = async (status: OrderStatus) => {
+    try {
+      const data = await orderServices.updateStatus(status, order.id); 
+      toast.success(`Order status updated to ${data?.data?.status || status}`);
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
   return (
     <Card className="flex flex-col gap-4 p-5">
       <div className="flex gap-4">
         <img
-          src={order.food?.image_url}
+          src={order.food?.image_url || ""}
           alt={order.food?.name}
           className="h-20 w-20 shrink-0 rounded-xl object-cover"
         />
@@ -30,7 +49,7 @@ function AdminOrderCard({
             </span>
           </div>
           <p className="mt-0.5 truncate text-sm text-muted-foreground">
-            Qty {order.quantity} &middot; {order.customer?.email ?? "—"}
+            Qty {order.quantity} &middot; {order.user?.email ?? "—"}
           </p>
           <p className="mt-0.5 text-xs text-muted-foreground">
             #{order.id.slice(0, 8)} &middot;{" "}
@@ -46,7 +65,7 @@ function AdminOrderCard({
         {!isFinal ? (
           <Select
             value={order.status}
-            // onValueChange={(v) => onStatusChange(v as OrderStatus)}
+            onValueChange={(v) => onStatusChange(v as OrderStatus)}
           >
             <SelectTrigger className="ml-auto w-42.5">
               <SelectValue />

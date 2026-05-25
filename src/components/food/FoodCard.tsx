@@ -10,7 +10,7 @@ const FoodCard = ({ food }: { food: Food }) => {
       <Card className="h-full overflow-hidden border-border/60 p-0 transition-all hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg">
         <div className="aspect-4/3 relative overflow-hidden bg-muted">
           <Image
-            src={food.image_url}
+            src={food.image_url || "https://i.ibb.co.com/qYbBkbcg/no-image-available-icon-flat-vector-no-image-available-icon-flat-vector-illustration-132482953.webp"}
             alt={food.name}
             loading="lazy"
             fill

@@ -7,12 +7,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { AdminOrder, STATUS_LABEL } from "@/constants/data";
+import { Order } from "../user/MyOrders";
+import Image from "next/image";
 
 function OrderDetailsDialog({
   order,
   onClose,
 }: {
-  order: AdminOrder | null;
+  order: Order | null;
   onClose: () => void;
 }) {
   return (
@@ -29,11 +31,14 @@ function OrderDetailsDialog({
 
             <div className="space-y-4">
               <div className="flex gap-4 rounded-xl border border-border p-3">
-                <img
-                  src={order.food?.image_url}
+                <div className="h-20 w-20 relative ">
+                  <Image
+                  src={order.food?.image_url || "https://i.ibb.co.com/qYbBkbcg/no-image-available-icon-flat-vector-no-image-available-icon-flat-vector-illustration-132482953.webp"}
                   alt={order.food?.name}
-                  className="h-20 w-20 rounded-lg object-cover"
+                  fill
+                  className="h-full w-full rounded-lg object-cover"
                 />
+                </div>
                 <div className="flex-1">
                   <Badge variant="secondary" className="text-[10px] uppercase">
                     {order.food?.category}
@@ -48,9 +53,9 @@ function OrderDetailsDialog({
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <Field
                   label="Customer"
-                  value={order.customer?.full_name ?? "—"}
+                  value={order.user?.name ?? "—"}
                 />
-                <Field label="Email" value={order.customer?.email ?? "—"} />
+                <Field label="Email" value={order.user?.email ?? "—"} />
                 <Field label="Quantity" value={String(order.quantity)} />
                 <Field
                   label="Total"

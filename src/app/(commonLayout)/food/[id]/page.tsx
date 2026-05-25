@@ -7,7 +7,7 @@ function FoodDetail() {
   return (
     <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <Button asChild variant="ghost" size="sm" className="mb-4">
-        <Link href="/">
+        <Link href="/food">
           <ArrowLeft className="h-4 w-4" /> Back to menu
         </Link>
       </Button>
