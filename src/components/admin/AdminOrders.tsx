@@ -18,7 +18,7 @@ import { toast } from "sonner";
 import { useSocketIO } from "@/hooks/useSocketIO";
 
 const AdminOrders = () => {
-  const { emit, on, isConnected, isLoading: socketLoading } = useSocketIO();
+  const { on, isConnected } = useSocketIO();
   const [activeTab, setActiveTab] = useState<OrderStatus>("ORDERED");
   const [selected, setSelected] = useState<Order | null>(null);
 
@@ -49,13 +49,16 @@ const AdminOrders = () => {
   });
 
   useEffect(() => {
-    on("order:created", (newOrder: Order) => {
-      setData((prev) => [newOrder, ...(prev ?? [])]);
-    });
-  }, []);
+    if (!isConnected) return;
 
+    const cleanup = on("order:created", (order: Order) => {
+      setData((prev) => [order, ...(prev ?? [])]);
+    });
+
+    return cleanup;
+  }, [isConnected, on]);
+console.log(data)
   const filtered = data?.filter((o) => o.status === activeTab) ?? [];
-  console.log(data)
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
