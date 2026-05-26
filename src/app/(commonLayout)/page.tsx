@@ -1,6 +1,4 @@
-import Hero from "@/components/home/Hero";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import Hero from "@/components/home/Hero"; 
 
 const page = () => {
   return (
