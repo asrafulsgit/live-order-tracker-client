@@ -87,18 +87,17 @@ order-tracker-client/
 │   │   ├── additionals/          # Navigation components
 │   │   │   └── Navbar.tsx        # Navigation bar
 │   │   ├── ui/                   # UI component library
-│   │   │   ├── button.tsx
-│   │   │   ├── card.tsx
-│   │   │   ├── dialog.tsx
-│   │   │   ├── input.tsx
-│   │   │   ├── badge.tsx
-│   │   │   ├── select.tsx
-│   │   │   ├── skeleton.tsx
-│   │   │   ├── tabs.tsx
-│   │   │   ├── textarea.tsx
-│   │   │   └── label.tsx
-│   │   └── examples/              # Example components
-│   │       └── SocketIOExample.tsx
+│   │       ├── button.tsx
+│   │       ├── card.tsx
+│   │       ├── dialog.tsx
+│   │       ├── input.tsx
+│   │       ├── badge.tsx
+│   │       ├── select.tsx
+│   │       ├── skeleton.tsx
+│   │       ├── tabs.tsx
+│   │       ├── textarea.tsx
+│   │       └── label.tsx
+│   │           
 │   │
 │   ├── contexts/                 # React Context providers
 │   │   └── SocketContext.tsx     # Socket.IO context provider
