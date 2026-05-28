@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { orderServices } from "@/services/order.services";
 import { toast } from "sonner";
 import { OrderStatus } from "@/constants/data";
+import { useSocketIO } from "@/hooks/useSocketIO";
 
 export type Order = {
   user: {
@@ -37,6 +38,7 @@ export type Order = {
 };
 
 const MyOrders = () => {
+  const { on, isConnected } = useSocketIO();
   const [data, setData] = useState<Order[] | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   useEffect(() => {
@@ -52,6 +54,19 @@ const MyOrders = () => {
 
     fetchUser();
   }, []);
+
+  useEffect(() => {
+      if (!isConnected) return;
+  
+      const cleanup = on("order:status-updated", (order: Order) => {
+        setData((prev) => {
+          if (!prev) return [order];
+          return prev.map((o) => o.id === order.id ? order : o);
+        });
+      });
+  
+      return cleanup;
+    }, [isConnected, on]);
 
   if (isLoading) {
     return (

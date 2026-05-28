@@ -6,7 +6,7 @@ import {
   STATUS_LABEL,
 } from "@/constants/data";
 import { CheckCircle2, Clock, Truck, Utensils, XCircle } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Card } from "../ui/card";
 import OrderDetailsDialog from "@/components/admin/OrderDialog";
 import { Badge } from "../ui/badge";
@@ -16,37 +16,42 @@ import { Order } from "../user/MyOrders";
 import { orderServices } from "@/services/order.services";
 import { toast } from "sonner";
 import { useSocketIO } from "@/hooks/useSocketIO";
-
+import { Button } from "../ui/button";
+type FetchState = "idle" | "loading" | "error";
 const AdminOrders = () => {
   const { on, isConnected } = useSocketIO();
   const [activeTab, setActiveTab] = useState<OrderStatus>("ORDERED");
   const [selected, setSelected] = useState<Order | null>(null);
 
   const [data, setData] = useState<Order[] | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const data = await orderServices.getAllOrders();
-        setData(data.data);
-        setIsLoading(false);
-      } catch (error: any) {
-        toast.error(error.message);
-      }
-    };
-
-    fetchUser();
+  const [fetchState, setFetchState] = useState<FetchState>("loading");
+  const fetchOrders = useCallback(async () => {
+    setFetchState("loading");
+    try {
+      const res = await orderServices.getAllOrders();
+      setData(res.data);
+      setFetchState("idle");
+    } catch (error: any) {
+      setFetchState("error");
+      toast.error(error?.message ?? "Failed to load orders.");
+    }
   }, []);
-  const counts: Record<OrderStatus, number> = {
-    ORDERED: 0,
-    IN_PROGRESS: 0,
-    DELIVERY: 0,
-    COMPLETED: 0,
-    CANCELLED: 0,
-  };
-  data?.forEach((o) => {
-    counts[o.status]++;
-  });
+
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
+
+  const counts = useMemo<Record<OrderStatus, number>>(() => {
+    const base: Record<OrderStatus, number> = {
+      ORDERED: 0,
+      IN_PROGRESS: 0,
+      DELIVERY: 0,
+      COMPLETED: 0,
+      CANCELLED: 0,
+    };
+    data?.forEach((o) => base[o.status]++);
+    return base;
+  }, [data]);
 
   useEffect(() => {
     if (!isConnected) return;
@@ -57,18 +62,54 @@ const AdminOrders = () => {
 
     return cleanup;
   }, [isConnected, on]);
-console.log(data)
-  const filtered = data?.filter((o) => o.status === activeTab) ?? [];
-  if (isLoading) {
+
+  useEffect(() => {
+    if (!isConnected) return;
+
+    const cleanup = on("order:status-updated", (order: Order) => {
+      setData((prev) => {
+        if (!prev) return [order];
+        return prev.map((o) => (o.id === order.id ? order : o));
+      });
+    });
+
+    return cleanup;
+  }, [isConnected, on]);
+
+  const filtered = useMemo(
+    () => data?.filter((o) => o.status === activeTab) ?? [],
+    [data, activeTab],
+  );
+
+  const handleCloseDialog = useCallback(() => setSelected(null), []);
+
+  if (fetchState === "loading") {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
       </div>
     );
   }
+
+  if (fetchState === "error") {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4">
+        <p className="text-sm text-muted-foreground">
+          Something went wrong loading orders.
+        </p>
+        <Button
+          onClick={fetchOrders}
+          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+        >
+          Retry
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <>
-      {/* Tabs */}
+      {/* ── Tabs ─────────────────────────────────────────────────────────── */}
       <div className="mb-6 flex flex-wrap gap-2 rounded-2xl bg-muted/50 p-1.5">
         {ORDER_STATUSES.map((s) => (
           <button
@@ -91,13 +132,8 @@ console.log(data)
         ))}
       </div>
 
-      {isLoading ? (
-        <div className="grid gap-4 sm:grid-cols-2">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-48 w-full rounded-2xl" />
-          ))}
-        </div>
-      ) : filtered.length === 0 ? (
+      {/* ── Order grid ───────────────────────────────────────────────────── */}
+      {filtered.length === 0 ? (
         <EmptyState status={activeTab} />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
@@ -106,15 +142,12 @@ console.log(data)
               key={o.id}
               order={o}
               onView={() => setSelected(o)}
-              // onStatusChange={(s) =>
-              // //   updateStatus.mutate({ id: o.id, status: s })
-              // }
             />
           ))}
         </div>
       )}
 
-      <OrderDetailsDialog order={selected} onClose={() => setSelected(null)} />
+      <OrderDetailsDialog order={selected} onClose={handleCloseDialog} />
     </>
   );
 };
