@@ -17,6 +17,7 @@ import { orderServices } from "@/services/order.services";
 import { toast } from "sonner";
 import { useSocketIO } from "@/hooks/useSocketIO";
 import { Button } from "../ui/button";
+import { cn } from "@/lib/utils";
 type FetchState = "idle" | "loading" | "error";
 const AdminOrders = () => {
   const { on, isConnected } = useSocketIO();
@@ -93,13 +94,14 @@ const AdminOrders = () => {
 
   if (fetchState === "error") {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4">
+      <div className="flex h-full flex-col items-center justify-center gap-4">
         <p className="text-sm text-muted-foreground">
           Something went wrong loading orders.
         </p>
         <Button
           onClick={fetchOrders}
-          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+          variant={"destructive"}
+          className={cn("", "cursor-pointer rounded-sm")}
         >
           Retry
         </Button>
